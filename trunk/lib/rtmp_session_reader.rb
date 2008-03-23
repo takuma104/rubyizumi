@@ -27,14 +27,14 @@ module RTMP
     def initialize(f)
       @f = f
       @chank_size = 128
-  		@frames_in = {}
+      @frames_in = {}
     end
   
     def set_chank_size(size)
       @chank_size = size
     end
-  
-  	def get_packet
+
+    def get_packet
       f_byte = read_bytes(1)
       first_number = f_byte.unpack("C")[0]
 
