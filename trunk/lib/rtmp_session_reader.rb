@@ -35,38 +35,38 @@ module RTMP
     end
   
   	def get_packet
- 			f_byte = read_bytes(1)
-			first_number = f_byte.unpack("C")[0]
+      f_byte = read_bytes(1)
+      first_number = f_byte.unpack("C")[0]
 
-			packet_type = first_number >> 6
-			frame_number = first_number & 0x3F
-			
-			if frame_number == 0
-				frame_number = read_bytes(1).unpack("C")[0]
-			elsif frame_number == 1
-				frame_number = read_bytes(2).unpack("n")[0]
-			end
+      packet_type = first_number >> 6
+      frame_number = first_number & 0x3F
 
-			if ! @frames_in.has_key? frame_number
-				@frames_in[frame_number] = Frame.new(0,0,0,0)
-				if packet_type != 0
-					raise StandardError, "packet error"
-				end
-			end
-			
-			case packet_type
-			when 0
-				@frames_in[frame_number].timer = getMediumInt()
-				@frames_in[frame_number].size = getMediumInt()
-				@frames_in[frame_number].data_type = read_bytes(1).unpack("C")[0]
-				@frames_in[frame_number].obj = read_bytes(4).unpack("N")[0]
-			when 1
-				@frames_in[frame_number].timer = getMediumInt()
-				@frames_in[frame_number].size = getMediumInt()
-				@frames_in[frame_number].data_type = read_bytes(1).unpack("C")[0]
-			when 2
-				@frames_in[frame_number].timer = getMediumInt()
-			end
+      if frame_number == 0
+        frame_number = read_bytes(1).unpack("C")[0]
+      elsif frame_number == 1
+        frame_number = read_bytes(2).unpack("n")[0]
+      end
+
+      if ! @frames_in.has_key? frame_number
+        @frames_in[frame_number] = Frame.new(0,0,0,0)
+        if packet_type != 0
+          raise StandardError, "packet error"
+        end
+      end
+
+      case packet_type
+      when 0
+        @frames_in[frame_number].timer = getMediumInt()
+        @frames_in[frame_number].size = getMediumInt()
+        @frames_in[frame_number].data_type = read_bytes(1).unpack("C")[0]
+        @frames_in[frame_number].obj = read_bytes(4).unpack("N")[0]
+      when 1
+        @frames_in[frame_number].timer = getMediumInt()
+        @frames_in[frame_number].size = getMediumInt()
+        @frames_in[frame_number].data_type = read_bytes(1).unpack("C")[0]
+      when 2
+        @frames_in[frame_number].timer = getMediumInt()
+      end
 
       chank_size = @chank_size
       packet_str = ""
@@ -95,18 +95,18 @@ module RTMP
       
   private
 
-		def getMediumInt
-  		num_array = read_bytes(3).unpack("C*")
-  		num = num_array[0]<< 16 ^ num_array[1]<< 8 ^ num_array[2]
-  		return num
-  	end
-  	  	
-  	def read_bytes(n)
+    def getMediumInt
+      num_array = read_bytes(3).unpack("C*")
+      num = num_array[0]<< 16 ^ num_array[1]<< 8 ^ num_array[2]
+      return num
+    end
+	
+    def read_bytes(n)
       buf = @f.read(n)
       raise StandardError, 'Connection closed.' unless buf
       buf
-	  end
-	  
+    end
+
   end
 end
 
