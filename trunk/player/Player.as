@@ -39,7 +39,7 @@ package {
 				video.deblocking = 2;
 				video.smoothing = true;
 				
-				_stream.play("/test.mp4");
+				_stream.play("test.mp4");
 				addChild(video);
 				_video = video
 				break;

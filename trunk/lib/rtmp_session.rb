@@ -28,15 +28,16 @@ module RTMP
     HandshakeSize = 1536
     EnlargedChankSize = 4096
     
-    def initialize(sock, stream)
+    def initialize(sock, stream_pool)
       @sock = sock
-      @stream = stream
+      @stream_pool = stream_pool
       @reader = SessionReader.new(@sock)
       @writer = SessionWriter.new(@sock)
+      @stream = nil
     end
     
     def do_session
-      puts "> #{@sock.inspect} is accepted"
+      IzumiLogger.debug "> #{@sock.inspect} is accepted"
       
       handshake
       
@@ -50,20 +51,22 @@ module RTMP
           when 20
       			pkt.extend FunctionCallExtension
             func = pkt.parsed_data.method.to_s
-            puts "> func:#{func}"
+            IzumiLogger.debug "> func:#{func}"
             case func
             when 'connect'
               on_connect
             when 'createStream'
               on_createStream
             when 'play'
+              IzumiLogger.info "Play: #{pkt.parsed_data.args[0]}"
+              @stream = @stream_pool.get(pkt.parsed_data.args[0])
               on_play
             end
           else
-            puts "> #{pkt.inspect}"
+            IzumiLogger.debug "> #{pkt.inspect}"
           end
         rescue => e
-          puts "exception: #{e}"
+          IzumiLogger.error "exception: #{e}"
           break
         end
       end
@@ -74,8 +77,8 @@ private
      @sock.read(1)
      c_handcheck = @sock.read(HandshakeSize)
      @sock.write( "\3" << HandshakeServer << c_handcheck )
-    	@sock.read(HandshakeSize)
-     puts "<> handshaked"
+     @sock.read(HandshakeSize)
+     IzumiLogger.debug "<> handshaked"
     end
     
     def on_connect
@@ -105,7 +108,7 @@ private
          if time > next_stop_time
            sleep 1
            next_stop_time = Time.now.to_f - start_time + offset
-           puts "< time:%.3f" % [next_stop_time]
+           IzumiLogger.debug "< time:%.3f" % [next_stop_time]
          end
          @sock.write(pkt)
        end
