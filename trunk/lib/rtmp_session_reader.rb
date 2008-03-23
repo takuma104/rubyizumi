@@ -75,25 +75,25 @@ module RTMP
 
       if len <= pos
         packet_str = read_bytes(len)
-      else
+      else  
         rest = len - pos
-        packet_str << read_bytes(pos)
-        while 0 < rest
-          read_bytes(1) #chank
+        packet_str  << read_bytes(pos)  
+        while 0  < rest
+          read_bytes(1) #chank  
           n = if rest > chank_size then chank_size else rest end
           packet_str << read_bytes(n)
           rest -= n
         end
       end
       
-			return Packet.new(frame_number,
-						@frames_in[frame_number].timer,
-						packet_str,
-						@frames_in[frame_number].data_type,
-						@frames_in[frame_number].obj)
-  	end
-  	
-private		
+      Packet.new(frame_number, 
+        @frames_in[frame_number].timer,
+        packet_str,
+        @frames_in[frame_number].data_type,
+        @frames_in[frame_number].obj)
+    end
+      
+  private
 
 		def getMediumInt
   		num_array = read_bytes(3).unpack("C*")

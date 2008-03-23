@@ -102,7 +102,6 @@ module RTMP
       				"level"=>"status",
       				"code"=>"NetConnection.Connect.Success",
       				"description"=>"Connection succeeded.",
-#      				"objectEncoding"=>0.0
       			}
       arguments = [connection_status]
 
