@@ -12,7 +12,7 @@ $ ruby server.rb mp4_filename.mp4
 $ cd player
 $ rascut Player.as -s
 
-- rascut: https://rubyforge.org/projects/hotchpotch/
+- rascut: http://hotchpotch.rubyforge.org/
 - Currently, it can play on Flash Player version 9,0,115,0.
 
 Takuma Mori <takuma104@gmail.com>
