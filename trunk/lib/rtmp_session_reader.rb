@@ -21,6 +21,9 @@
 require 'rtmp_packet'
 
 module RTMP
+  
+  class ConnectionClosedException < Exception; end
+  
   class SessionReader
     Frame = Struct.new("Frame",:timer,:size,:data_type,:obj)
 
@@ -103,7 +106,7 @@ module RTMP
 	
     def read_bytes(n)
       buf = @f.read(n)
-      raise StandardError, 'Connection closed.' unless buf
+      raise ConnectionClosedException, 'Connection closed.' unless buf
       buf
     end
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 #
-#    RubyIZUMI Ver.0.02
+#    RubyIZUMI Ver.0.03
 #
 #    Copyright (C) 2008 Takuma Mori, SGRA Corporation
 #    <mori@sgra.co.jp> <http://www.sgra.co.jp/en/>
@@ -27,13 +27,14 @@ require 'rtmp_mp4stream'
 require 'optparse'
 require 'stream_pool'
 require 'logger'
+require 'utils'
 
 module RTMP
-  FmsVer = 'RubyIZUMI/0,0,0,2'
+  FmsVer = 'RubyIZUMI/0,0,0,3'
 end
 
 def usage
-  puts "Usage: server.rb (options) document_root_directory/"
+  puts "Usage: server.rb (options) document_root_directory or filename"
   puts "Options: -p listen port (default=1935)"
   puts "         -v verbose (0:debug 1:info) (default=1)"
   puts "         -l logfile (default=STDERR)"
@@ -52,8 +53,8 @@ if ARGV.size != 1
   usage
 end
 
-document_root = File.expand_path(ARGV.shift)
-if File.ftype(document_root) != "directory"
+path = IZUMI::Filename.new(File.expand_path(ARGV.shift))
+if path.type == :unknown
   usage
 end
 
@@ -61,10 +62,16 @@ end
 IzumiLogger = Logger.new(if OPTS[:l] then OPTS[:l] else STDERR end)
 IzumiLogger.level = if OPTS[:v] == 1 then Logger::INFO else Logger::DEBUG end
 
-pool = IZUMI::StreamPool.new(document_root)
+pool = IZUMI::StreamPool.new(path)
 
 gs = TCPServer.open(OPTS[:p])
-IzumiLogger.info "Document Root: #{document_root}"
+case path.type
+when :directory
+  IzumiLogger.info "Document Root: #{path.path}"
+when :file
+  IzumiLogger.info "Target File: #{path.path}"
+end
+
 IzumiLogger.info "Server started. Port: #{OPTS[:p]}"
 
 loop do

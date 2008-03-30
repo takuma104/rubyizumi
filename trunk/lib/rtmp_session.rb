@@ -37,7 +37,9 @@ module RTMP
     end
     
     def do_session
-      IzumiLogger.debug "> #{@sock.inspect} is accepted"
+      peer_addr = "%s(%s):%d" % [@sock.peeraddr[3],@sock.peeraddr[2],@sock.peeraddr[1]]
+      
+      IzumiLogger.info "#{peer_addr} Connected."
       
       handshake
       
@@ -58,15 +60,18 @@ module RTMP
             when 'createStream'
               on_createStream
             when 'play'
-              IzumiLogger.info "Play: #{pkt.parsed_data.args[0]}"
+              IzumiLogger.info "#{peer_addr} Play: #{pkt.parsed_data.args[0]}"
               @stream = @stream_pool.get(pkt.parsed_data.args[0])
               on_play
             end
           else
             IzumiLogger.debug "> #{pkt.inspect}"
           end
+        rescue ConnectionClosedException
+          IzumiLogger.info "#{peer_addr} Connection closed."
+          break
         rescue => e
-          IzumiLogger.error "exception: #{e}"
+          IzumiLogger.error "#{peer_addr} Exception caught\nError: #{e} \nTrace:\n#{e.backtrace}"
           break
         end
       end

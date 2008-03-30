@@ -28,9 +28,13 @@ module RTMP
       info = IZUMI::MP4Parser.new(File.new(@fn))
       @frames = info.get_frames
       avc1=info.get_avc1_track_index
+      if avc1
+        @video_extra = info.get_track_metadata(avc1)[:extra_data][8..-1]
+      end
       mp4a=info.get_mp4a_track_index
-      @video_extra = info.get_track_metadata(avc1)[:extra_data][8..-1]
-      @audio_extra = info.get_track_metadata(mp4a)[:extra_data]
+      if mp4a
+        @audio_extra = info.get_track_metadata(mp4a)[:extra_data]
+      end
     end
      
     def each

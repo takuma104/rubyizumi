@@ -2,13 +2,19 @@ require 'rtmp_mp4stream'
 
 module IZUMI
   class StreamPool
-    def initialize(document_root)
-      @document_root = document_root
+    def initialize(path)
+      @path = path
       @pool = {}
     end
 
     def get(fn)
-      path = File.join(@document_root, fn)
+      if @path.type == :directory
+        # add fn to path as document_root 
+        path = File.join(@path.path, fn)
+      else
+        # ignore fn and just load from path
+        path = @path.path
+      end
       if @pool.has_key?(path)
         @pool[path]
       else
