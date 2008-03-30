@@ -60,8 +60,8 @@ module RTMP
             when 'createStream'
               on_createStream
             when 'play'
-              IzumiLogger.info "#{peer_addr} Play: #{pkt.parsed_data.args[0]}"
               @stream = @stream_pool.get(pkt.parsed_data.args[0])
+              IzumiLogger.info "#{peer_addr} Play: #{pkt.parsed_data.args[0]} (File: #{@stream.fn})"
               on_play
             end
           else

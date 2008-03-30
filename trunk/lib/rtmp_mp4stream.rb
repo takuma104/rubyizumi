@@ -36,6 +36,8 @@ module RTMP
         @audio_extra = info.get_track_metadata(mp4a)[:extra_data]
       end
     end
+    
+    attr_reader :fn
      
     def each
       mp4 = open(@fn, 'rb')
