@@ -359,5 +359,5 @@ end
 
 if $0 == __FILE__
   require 'pp'
-  pp IZUMI::MP4Parser.new(open(ARGV.shift)).get_frames
+  pp IZUMI::MP4Parser.new(open(ARGV.shift, 'rb')).get_frames
 end

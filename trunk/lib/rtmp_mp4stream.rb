@@ -25,7 +25,7 @@ module RTMP
   class MP4Stream
     def initialize(fn)
       @fn = fn
-      info = IZUMI::MP4Parser.new(File.new(@fn))
+      info = IZUMI::MP4Parser.new(open(@fn, 'rb'))
       @frames = info.get_frames
       avc1=info.get_avc1_track_index
       if avc1
