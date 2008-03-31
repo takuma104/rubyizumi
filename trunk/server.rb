@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 #
-#    RubyIZUMI Ver.0.03
+#    RubyIZUMI Ver.0.04
 #
 #    Copyright (C) 2008 Takuma Mori, SGRA Corporation
 #    <mori@sgra.co.jp> <http://www.sgra.co.jp/en/>
@@ -30,7 +30,7 @@ require 'logger'
 require 'utils'
 
 module RTMP
-  FmsVer = 'RubyIZUMI/0,0,0,3'
+  FmsVer = 'RubyIZUMI/0,0,0,4'
 end
 
 def usage
