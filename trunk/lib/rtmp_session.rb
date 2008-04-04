@@ -37,7 +37,7 @@ module RTMP
     end
     
     def do_session
-      peer_addr = "%s(%s):%d" % [@sock.peeraddr[3],@sock.peeraddr[2],@sock.peeraddr[1]]
+      peer_addr = "%s:%d" % [@sock.peeraddr[3],@sock.peeraddr[1]]
       
       IzumiLogger.info "#{peer_addr} Connected."
       
@@ -67,8 +67,11 @@ module RTMP
           else
             IzumiLogger.debug "> #{pkt.inspect}"
           end
-        rescue ConnectionClosedException
+        rescue ConnectionClosedException, Errno::ECONNRESET
           IzumiLogger.info "#{peer_addr} Connection closed."
+          break
+        rescue Errno::ENOENT => e
+          IzumiLogger.error "#{peer_addr} #{e} Connection closed."
           break
         rescue => e
           IzumiLogger.error "#{peer_addr} Exception caught\nError: #{e} \nTrace:\n#{e.backtrace}"

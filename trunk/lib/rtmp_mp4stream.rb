@@ -25,7 +25,10 @@ module RTMP
   class MP4Stream
     def initialize(fn)
       @fn = fn
-      info = IZUMI::MP4Parser.new(open(@fn, 'rb'))
+      info = nil
+      open(@fn, 'rb') do |f|
+        info = IZUMI::MP4Parser.new(f)
+      end
       @frames = info.get_frames
       avc1=info.get_avc1_track_index
       if avc1
@@ -98,7 +101,7 @@ module RTMP
 
         loop_offset += last_timecode
       end
-
+    ensure
       mp4.close
     end
   

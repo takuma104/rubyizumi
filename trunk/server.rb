@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 #
-#    RubyIZUMI Ver.0.04
+#    RubyIZUMI Ver.0.05
 #
 #    Copyright (C) 2008 Takuma Mori, SGRA Corporation
 #    <mori@sgra.co.jp> <http://www.sgra.co.jp/en/>
@@ -30,7 +30,7 @@ require 'logger'
 require 'utils'
 
 module RTMP
-  FmsVer = 'RubyIZUMI/0,0,0,4'
+  FmsVer = 'RubyIZUMI/0,0,0,5'
 end
 
 def usage
@@ -41,50 +41,67 @@ def usage
   exit(-1)
 end
 
-OPTS = {:p=>1935,:v=>1,:log=>nil}
+def parse_argv
+  options = {:p=>1935,:v=>1,:log=>nil}
 
-opt = OptionParser.new
-opt.on('-p VAL') {|v| OPTS[:p] = v.to_i }
-opt.on('-v VAL') {|v| OPTS[:v] = v.to_i }
-opt.on('-l VAL') {|v| OPTS[:l] = v }
-opt.parse!(ARGV)
+  opt = OptionParser.new
+  opt.on('-p VAL') {|v| options[:p] = v.to_i }
+  opt.on('-v VAL') {|v| options[:v] = v.to_i }
+  opt.on('-l VAL') {|v| options[:l] = v }
+  opt.parse!(ARGV)
 
-if ARGV.size != 1
-  usage
+  if ARGV.size != 1
+    usage
+  end
+
+  path = IZUMI::Filename.new(File.expand_path(ARGV.shift))
+  if path.type == :unknown
+    usage
+  end
+  
+  [path, options]
 end
 
-path = IZUMI::Filename.new(File.expand_path(ARGV.shift))
-if path.type == :unknown
-  usage
-end
+def server_loop(path, port)
+  pool = IZUMI::StreamPool.new(path)
 
-# setup logger 
-IzumiLogger = Logger.new(if OPTS[:l] then OPTS[:l] else STDERR end)
-IzumiLogger.level = if OPTS[:v] == 1 then Logger::INFO else Logger::DEBUG end
+  case path.type
+  when :directory
+    IzumiLogger.info "Document Root: #{path.path}"
+  when :file
+    IzumiLogger.info "Target File: #{path.path}"
+  end
 
-pool = IZUMI::StreamPool.new(path)
+  # disable DNS reverse lookup
+  TCPSocket.do_not_reverse_lookup = true
 
-gs = TCPServer.open(OPTS[:p])
-case path.type
-when :directory
-  IzumiLogger.info "Document Root: #{path.path}"
-when :file
-  IzumiLogger.info "Target File: #{path.path}"
-end
-
-IzumiLogger.info "Server started. Port: #{OPTS[:p]}"
-
-loop do
-  Thread.start(gs.accept) do |s|
-    begin
-      session = RTMP::Session.new(s, pool)
-      session.do_session
-    rescue => e
-      puts "exception caught: #{e}"
+  begin
+    gs = TCPServer.open(port)
+    IzumiLogger.info "Server started. Port: #{port}"
+    loop do
+      Thread.start(gs.accept) do |s|
+        begin
+          session = RTMP::Session.new(s, pool)
+          session.do_session
+        rescue => e
+          puts "exception caught: #{e}"
+        ensure
+          s.close
+        end
+      end
     end
+  rescue Interrupt
+  ensure
+    gs.close
   end
 end
 
-#s = gs.accept
-#session = RTMP::Session.new(s, mp4)
-#session.do_session
+if $0 == __FILE__
+  path, options = parse_argv
+  
+  # setup logger 
+  IzumiLogger = Logger.new(if options[:l] then options[:l] else STDERR end)
+  IzumiLogger.level = if options[:v] == 1 then Logger::INFO else Logger::DEBUG end  
+  
+  server_loop(path, options[:p])
+end
