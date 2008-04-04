@@ -38,16 +38,18 @@ def usage
   puts "Options: -p listen port (default=1935)"
   puts "         -v verbose (0:debug 1:info) (default=1)"
   puts "         -l logfile (default=STDERR)"
+  puts "         -d (daemonize)"
   exit(-1)
 end
 
 def parse_argv
-  options = {:p=>1935,:v=>1,:log=>nil}
+  options = {:p=>1935,:v=>1,:log=>nil,:d=>false}
 
   opt = OptionParser.new
   opt.on('-p VAL') {|v| options[:p] = v.to_i }
   opt.on('-v VAL') {|v| options[:v] = v.to_i }
   opt.on('-l VAL') {|v| options[:l] = v }
+  opt.on('-d') {|v| options[:d] = true }
   opt.parse!(ARGV)
 
   if ARGV.size != 1
@@ -62,14 +64,41 @@ def parse_argv
   [path, options]
 end
 
+def daemon
+  return yield if $DEBUG
+  Process.fork do
+    Process.setsid
+    Dir.chdir "/"
+    trap("SIGINT") do 
+      IzumiLogger.info "Interrupted. Exit."
+      exit! 0 
+    end
+    trap("SIGTERM") do 
+      IzumiLogger.info "Terminated. Exit."
+      exit! 0 
+    end
+    trap("SIGHUP") do 
+      IzumiLogger.info "Got HUP. Exit."
+      exit! 0 
+    end
+    File.open("/dev/null") do |f|
+      STDIN.reopen f
+      STDOUT.reopen f
+      STDERR.reopen f
+    end
+    yield
+  end
+  exit! 0
+end
+
 def server_loop(path, port)
   pool = IZUMI::StreamPool.new(path)
 
   case path.type
   when :directory
-    IzumiLogger.info "Document Root: #{path.path}"
+    IzumiLogger.info "Document Root:#{path.path}"
   when :file
-    IzumiLogger.info "Target File: #{path.path}"
+    IzumiLogger.info "Target File:#{path.path}"
   end
 
   # disable DNS reverse lookup
@@ -77,14 +106,14 @@ def server_loop(path, port)
 
   begin
     gs = TCPServer.open(port)
-    IzumiLogger.info "Server started. Port: #{port}"
+    IzumiLogger.info "Server started. Ver:#{RTMP::FmsVer} Pid:#{$$} Port:#{port}"
     loop do
       Thread.start(gs.accept) do |s|
         begin
           session = RTMP::Session.new(s, pool)
           session.do_session
         rescue => e
-          puts "exception caught: #{e}"
+          puts "Exception caught: #{e}"
         ensure
           s.close
         end
@@ -93,6 +122,7 @@ def server_loop(path, port)
   rescue Interrupt
   ensure
     gs.close
+    IzumiLogger.info "Exit."
   end
 end
 
@@ -103,5 +133,12 @@ if $0 == __FILE__
   IzumiLogger = Logger.new(if options[:l] then options[:l] else STDERR end)
   IzumiLogger.level = if options[:v] == 1 then Logger::INFO else Logger::DEBUG end  
   
-  server_loop(path, options[:p])
+  if options[:d]
+    puts "Warnning: Please specify log file in daemon mode." unless options[:l]
+    daemon do
+      server_loop(path, options[:p])
+    end
+  else
+    server_loop(path, options[:p])
+  end
 end
