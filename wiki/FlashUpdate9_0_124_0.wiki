@@ -2,9 +2,13 @@
 
 = Issue on Flash Player update 9,0,124,0 (FMS3.0.1) =
 
+== The Issue ==
+
+If you use new Flash Player 9,0,124,0, you can't see any video streaming served by RubyIZUMI. It seems some change on RTMP handshaking.
+
 == Bypassing Handshake to FMS3.0.1 ==
 
-The following code i wrote to pass through to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 Edge ip address) :
+The following code i wrote to pass through to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 Edge ip address) . If you use it, you can play with 9,0,124,0 :)
 
 {{{
 def handshake
