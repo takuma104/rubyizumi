@@ -29,9 +29,9 @@ def handshake
 end
 }}}
 
- * d1: Flash Player -> RubyIZUMI
- * d2: RubyIZUMI -> Flash Player
- * d3: RubyIZUMI -> Flash Player
+ * d1: Flash Player -> RubyIZUMI (Client request?)
+ * d2: RubyIZUMI -> Flash Player (Server response?)
+ * d3: RubyIZUMI -> Flash Player (???)
 
 == Tried some times using this code and i found: ==
  * *d3 can not equal d1 (9,0,115,0 or older version can equal these)*
