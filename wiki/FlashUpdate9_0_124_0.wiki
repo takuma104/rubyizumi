@@ -34,7 +34,7 @@ end
  * d3: RubyIZUMI -> Flash Player
 
 == Tried some times using this code and i found: ==
- * *d3 can not equal d2 (9,0,115,0 or older can equal these)*
+ * *d3 can not equal d1 (9,0,115,0 or older version can equal these)*
  * d1 and d2 seems contain uptime in first 4byte (I guess the other bytes are generate this value)
  * d3 seems simply random ;)
 
