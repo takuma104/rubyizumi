@@ -30,6 +30,10 @@ end
  * d3: RubyIZUMI -> Flash Player
 
 == Tried some times using this code and i found: ==
- * d3 is not equal d2 (9,0,115,0 or older can equal these)
+ * d3 can not equal d2 (9,0,115,0 or older can equal these)
  * d1 and d2 seems contain uptime in first 4byte (I guess the other bytes are generate this value)
  * d3 seems simply random ;)
+
+== References ==
+ * Old handshake algorithm: http://www.mail-archive.com/red5@osflash.org/msg04906.html
+ * RTMP Protocol (osflash): http://www.osflash.org/rtmp/protocol#handshake
