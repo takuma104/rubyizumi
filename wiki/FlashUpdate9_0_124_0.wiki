@@ -2,7 +2,7 @@
 
 = Issue on Flash Player update 9,0,124,0 (FMS3.0.1) =
 
-= To Bypass Handshaking to FMS3.0.1 =
+== Bypassing Handshake to FMS3.0.1 ==
 
 The following code i wrote to pass through to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 Edge ip address) :
 
