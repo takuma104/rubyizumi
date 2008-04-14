@@ -8,7 +8,7 @@ If you play with new Flash Player 9,0,124,0, you can't see any video streaming s
 
 == Bypassing Handshake to FMS3.0.1 ==
 
-The following code i wrote is to pass through handshake to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 Edge IP address) . If you use this patch, you can play with 9,0,124,0 :)
+The following code i wrote is to pass through handshake to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 (Edge) IP address) . If you use this patch, you can play with 9,0,124,0 :)
 
 {{{
 def handshake
