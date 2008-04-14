@@ -24,3 +24,12 @@ def handshake
   IzumiLogger.debug ”<> handshaked 3.0.1”
 end
 }}}
+
+ * d1: Flash Player -> RubyIZUMI
+ * d2: RubyIZUMI -> Flash Player
+ * d3: RubyIZUMI -> Flash Player
+
+== Tried some times using this code and i found: ==
+ * d3 is not equal d2 (9,0,115,0 or older can equal these)
+ * d1 and d2 seems contain uptime in first 4byte (I guess the other bytes are generate this value)
+ * d3 seems simply random ;)
