@@ -1,0 +1,26 @@
+#summary Issue on Flash Player update 9,0,124,0 (FMS3.0.1)
+
+= Issue on Flash Player update 9,0,124,0 (FMS3.0.1) =
+
+= To Bypass Handshaking to FMS3.0.1 =
+
+The following code i wrote to pass through to FMS3 (RTMP::Session#handshake, The address ”1.2.3.4” is FMS3 Edge ip address) :
+
+{{{
+def handshake
+  s = TCPSocket.open(”1.2.3.4”, 1935)
+  @sock.read(1)
+  s.write(”\3”)
+  d1 = @sock.read(HandshakeSize)
+  s.write(d1)
+  s.read(1)
+  @sock.write(”\3”)
+  d2 = s.read(HandshakeSize)
+  d3 = s.read(HandshakeSize)
+  @sock.write(d2)
+  @sock.write(d3)
+  @sock.read(HandshakeSize)
+  s.close
+  IzumiLogger.debug ”<> handshaked 3.0.1”
+end
+}}}
