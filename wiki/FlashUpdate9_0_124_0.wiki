@@ -41,3 +41,7 @@ end
 == References ==
  * Old handshake algorithm: http://www.mail-archive.com/red5@osflash.org/msg04906.html
  * RTMP Protocol (osflash): http://www.osflash.org/rtmp/protocol#handshake
+
+== Please let me know if you have a solution for this issue ==
+
+Please let me know via email or gtalk! : takuma104@gmail.com
