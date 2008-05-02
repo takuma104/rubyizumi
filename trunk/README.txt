@@ -18,7 +18,6 @@ $ cd player
 $ rascut Player.as -s
 
 - rascut: http://hotchpotch.rubyforge.org/
-- Currently, it can play on Flash Player version 9,0,115,0 (latest).
+- Currently, it can play on Flash Player version 9,0,115,0 and 9,0,124,0 (I comfirmed).
 
 Takuma Mori <takuma104@gmail.com>
-

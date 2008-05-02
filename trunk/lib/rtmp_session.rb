@@ -58,10 +58,6 @@ module RTMP
             when 'connect'
               ver = pkt.parsed_data.first_arg['flashVer'].scan(/\d+/).map {|v| v.to_i}
               IzumiLogger.debug "> flashVer:#{ver.inspect}"
-              if ver != [9,0,115,0]
-                IzumiLogger.error "Client FlashVer:#{ver.inspect} This version can only play with Flash Player version 9,0,115,0. Disconnect."
-                break
-              end
               on_connect()
             when 'createStream'
               on_createStream
@@ -90,7 +86,7 @@ private
     def handshake
       @sock.read(1)
       c_handcheck = @sock.read(HandshakeSize)
-      @sock.write( "\3" << HandshakeServer << c_handcheck )
+      @sock.write( "\3" << HandshakeServer << Handshake.get_handshake(c_handcheck ))
       @sock.read(HandshakeSize)
       IzumiLogger.debug "<> handshaked"
     end
