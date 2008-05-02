@@ -19,8 +19,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-require 'openssl'
-
 HandshakeServer = [
 0x01,0x86,0x4f,0x7f,0x00,0x00,0x00,0x00,0x6b,0x04,0x67,0x52,0xa2,0x70,0x5b,0x51,
 0xa2,0x89,0xca,0xcc,0x8e,0x70,0xf0,0x06,0x70,0x0e,0xd7,0xb3,0x73,0x7f,0x07,0xc1,
@@ -128,6 +126,8 @@ KeyServer = [
 0xcf,0xeb,0x31,0xae,
 ].pack('C*')
 
+require 'hmac-sha2'
+
 module RTMP
   class Handshake
 	def Handshake.get_handshake(client)
@@ -136,13 +136,13 @@ module RTMP
 			return client
 		else
 			part = client_a[(client_a[8] + client_a[9] + client_a[10] + client_a[11]) % 728 + 12,32].pack('C*')
-			a = OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new('sha256'), KeyServer, part)
+			a = HMAC::SHA256.digest(KeyServer, part)
 			server_a = Array.new()
 			1504.times do
 				server_a.push(rand(256))
 			end
 			server = server_a.pack("C*")
-			server = server + OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new('sha256'), a, server)
+			server = server + HMAC::SHA256.digest(a, server)
 			return server
 		end
   	end

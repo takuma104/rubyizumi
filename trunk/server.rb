@@ -20,6 +20,7 @@
 #
 
 $: << "./lib" #!!!
+$: << "./lib/hmac" #!!!
 
 require 'socket'
 require 'rtmp_session'
@@ -127,16 +128,7 @@ def server_loop(path, port)
   end
 end
 
-def openssl_version_check
-  if OpenSSL::OPENSSL_VERSION_NUMBER <= 0x00908000
-    puts "RubyIZUMI currently needs OpenSSL version 0.98 or later. Detected version is '#{OpenSSL::OPENSSL_VERSION}'"
-    exit(-1)
-  end
-end
-
 if $0 == __FILE__
-  openssl_version_check
-  
   path, options = parse_argv
   
   # setup logger 
