@@ -2,7 +2,7 @@
 
 = This issue fixed by r28(version 0.10). Thanks to Yaacov! =
 
-= Issue on Flash Player update 9,0,124,0 (FMS3.0.1) =
+== Issue on Flash Player update 9,0,124,0 (FMS3.0.1) ==
 
 == The Issue ==
 
