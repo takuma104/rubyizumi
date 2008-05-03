@@ -1,4 +1,6 @@
 require 'rtmp_mp4stream'
+require 'sdp_parser'
+require 'rtpreceiver'
 
 module IZUMI
   class StreamPool
@@ -25,4 +27,17 @@ module IZUMI
       end
     end  
   end
+  
+  class StreamPoolRTP
+    def initialize(fn)
+      sdp = SdpParser.new(fn)
+      raise "Not found video description in sdp." unless sdp.video
+      @s = RtpReceiver.new(sdp.video, :video)
+    end
+    
+    def get(fn)
+      @s
+    end
+  end
+
 end

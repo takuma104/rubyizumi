@@ -23,6 +23,7 @@ $: << "./lib" #!!!
 $: << "./lib/hmac" #!!!
 $: << "./lib/rtmp" #!!!
 $: << "./lib/mp4" #!!!
+$: << "./lib/rtp" #!!!
 
 require 'socket'
 require 'rtmp_session'
@@ -43,17 +44,19 @@ def usage
   puts "         -v verbose (0:debug 1:info) (default=1)"
   puts "         -l logfile (default=STDERR)"
   puts "         -d (daemonize)"
+  puts "         -rtp rtpmode"
   exit(-1)
 end
 
 def parse_argv
-  options = {:p=>1935,:v=>1,:log=>nil,:d=>false}
+  options = {:p=>1935,:v=>1,:log=>nil,:d=>false,:rtp=>false}
 
   opt = OptionParser.new
   opt.on('-p VAL') {|v| options[:p] = v.to_i }
   opt.on('-v VAL') {|v| options[:v] = v.to_i }
   opt.on('-l VAL') {|v| options[:l] = v }
   opt.on('-d') {|v| options[:d] = true }
+  opt.on('-rtp') {|v| options[:rtp] = true }
   opt.parse!(ARGV)
 
   if ARGV.size != 1
@@ -95,14 +98,19 @@ def daemon
   exit! 0
 end
 
-def server_loop(path, port)
-  pool = IZUMI::StreamPool.new(path)
-
-  case path.type
-  when :directory
-    IzumiLogger.info "Document Root:#{path.path}"
-  when :file
-    IzumiLogger.info "Target File:#{path.path}"
+def server_loop(path, port, rtpmode)
+  pool = nil
+  if rtpmode
+    pool = IZUMI::StreamPoolRTP.new(path)
+    IzumiLogger.info "RTP Mode SDP:#{path.path}"
+  else
+    pool = IZUMI::StreamPool.new(path)
+    case path.type
+    when :directory
+      IzumiLogger.info "Document Root:#{path.path}"
+    when :file
+      IzumiLogger.info "Target File:#{path.path}"
+    end
   end
 
   # disable DNS reverse lookup
@@ -140,9 +148,9 @@ if $0 == __FILE__
   if options[:d]
     puts "Warnning: Please specify log file in daemon mode." unless options[:l]
     daemon do
-      server_loop(path, options[:p])
+      server_loop(path, options[:p], options[:rtp])
     end
   else
-    server_loop(path, options[:p])
+    server_loop(path, options[:p], options[:rtp])
   end
 end

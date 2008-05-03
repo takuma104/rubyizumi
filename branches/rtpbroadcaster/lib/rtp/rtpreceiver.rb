@@ -43,6 +43,10 @@ module IZUMI
       when :audio
       end
     end
+    
+    def fn
+      "test!!"
+    end
   
   private  
   
@@ -194,7 +198,7 @@ module IZUMI
             keyframe = (buf[4..5].unpack('C')[0] & 0x1f) == 5
             t = ((time - last_send_time) * 1000.0).to_i
             last_send_time = time
-            puts "t:#{t} keyframe:#{keyframe}"
+            IzumiLogger.debug "t:#{t} keyframe:#{keyframe}"
             es = get_payload_header(@media,keyframe) << buf
 #            write_to_file(buf)
             rtmp_packet = get_rtmp_packet_header(t, buf.length, @media, false) << get_rtmp_chanked_payload(es)

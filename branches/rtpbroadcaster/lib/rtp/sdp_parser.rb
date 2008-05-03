@@ -26,7 +26,7 @@ module IZUMI
       @video = nil
       @audio = nil
 
-      io = open(sdp_fn)
+      io = open(sdp_fn.path)
       sdp = parse_sdp(io)
     
       sdp.each do |s|
