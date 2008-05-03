@@ -41,7 +41,7 @@ end
 def usage
   puts "Usage: server.rb (options) document_root_directory or filename"
   puts "Options: -p listen port (default=1935)"
-  puts "         -v verbose (0:debug 1:info) (default=1)"
+  puts "         -v verbose"
   puts "         -l logfile (default=STDERR)"
   puts "         -d (daemonize)"
   puts "         -rtp rtpmode"
@@ -49,12 +49,12 @@ def usage
 end
 
 def parse_argv
-  options = {:p=>1935,:v=>1,:log=>nil,:d=>false,:rtp=>false}
+  options = {:p=>1935,:v=>false,:log=>nil,:d=>false,:rtp=>false}
 
   opt = OptionParser.new
   opt.on('-p VAL') {|v| options[:p] = v.to_i }
-  opt.on('-v VAL') {|v| options[:v] = v.to_i }
   opt.on('-l VAL') {|v| options[:l] = v }
+  opt.on('-v') {|v| options[:v] = true }
   opt.on('-d') {|v| options[:d] = true }
   opt.on('-rtp') {|v| options[:rtp] = true }
   opt.parse!(ARGV)
@@ -143,7 +143,7 @@ if $0 == __FILE__
   
   # setup logger 
   IzumiLogger = Logger.new(if options[:l] then options[:l] else STDERR end)
-  IzumiLogger.level = if options[:v] == 1 then Logger::INFO else Logger::DEBUG end  
+  IzumiLogger.level = if options[:v] then Logger::DEBUG else Logger::INFO end  
   
   if options[:d]
     puts "Warnning: Please specify log file in daemon mode." unless options[:l]
