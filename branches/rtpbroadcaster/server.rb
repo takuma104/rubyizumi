@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 #
-#    RubyIZUMI Ver.0.10
+#    RubyIZUMI Ver.0.20
 #
 #    Copyright (C) 2008 Takuma Mori, SGRA Corporation
 #    <mori@sgra.co.jp> <http://www.sgra.co.jp/en/>
@@ -21,6 +21,8 @@
 
 $: << "./lib" #!!!
 $: << "./lib/hmac" #!!!
+$: << "./lib/rtmp" #!!!
+$: << "./lib/mp4" #!!!
 
 require 'socket'
 require 'rtmp_session'
@@ -32,7 +34,7 @@ require 'utils'
 require 'openssl'
 
 module RTMP
-  FmsVer = 'RubyIZUMI/0,1,1,0'
+  FmsVer = 'RubyIZUMI/0,2,0,0'
 end
 
 def usage
