@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 #
-#    RubyIZUMI Ver.0.10
+#    RubyIZUMI Ver.0.12
 #
 #    Copyright (C) 2008 Takuma Mori, SGRA Corporation
 #    <mori@sgra.co.jp> <http://www.sgra.co.jp/en/>
@@ -29,10 +29,9 @@ require 'optparse'
 require 'stream_pool'
 require 'logger'
 require 'utils'
-require 'openssl'
 
 module RTMP
-  FmsVer = 'RubyIZUMI/0,1,1,0'
+  FmsVer = 'RubyIZUMI/0,1,2,0'
 end
 
 def usage
