@@ -61,11 +61,11 @@ module RTMP
 
           first = false
           payload_header = nil
-          case e[0] # type
-          when :audio
+
+          if e[0] == :audio # e[0]:type
             first = if a_cnt == 0 then true else false end
             payload_header = "\xaf\x01"
-          when :video
+          else
             first = if v_cnt == 0 then true else false end
             if e[4] # keyframe
               payload_header = "\x17\x01\0\0\0"
@@ -80,12 +80,11 @@ module RTMP
           rtmp_packet = get_rtmp_packet_header(time, size, e[0], first) + get_rtmp_chanked_payload(es)
 
           if first
-            case e[0]
-            when :audio
+            if e[0] == :audio # e[0]:type
               mp4ah = @audio_extra
               d = get_rtmp_packet_header(0,mp4ah.length,:audio,true) + "\xaf\0" + mp4ah
               yield(0, d)
-            when :video
+            else # video
               avch = @video_extra
               d = get_rtmp_packet_header(0,avch.length,:video, true) + "\x17\0\0\0\0" + avch
               yield(0, d)
@@ -94,10 +93,9 @@ module RTMP
 
           yield(loop_offset + e[3], rtmp_packet)
 
-          case e[0]
-          when :audio
+          if e[0] == :audio # e[0]:type
             a_cnt+=1
-          when :video
+          else # video
             v_cnt+=1
           end
  
@@ -120,10 +118,10 @@ module RTMP
         str = "\x45"
       end
       str += [time].pack("N1")[1,3]
-      case type
-      when :audio
+      
+      if type == :audio
         str += [size+2].pack("N1")[1,3] + "\x08"
-      when :video
+      else #video
         str += [size+5].pack("N1")[1,3] + "\x09"
       end
 
