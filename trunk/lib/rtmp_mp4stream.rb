@@ -60,27 +60,34 @@ module RTMP
           size = e[2]
 
           first = false
-          case e[0]
+          payload_header = nil
+          case e[0] # type
           when :audio
             first = if a_cnt == 0 then true else false end
+            payload_header = "\xaf\x01"
           when :video
             first = if v_cnt == 0 then true else false end
+            if e[4] # keyframe
+              payload_header = "\x17\x01\0\0\0"
+            else
+              payload_header = "\x27\x01\0\0\0"
+            end
           end
 
           mp4.seek(e[1])
           es = mp4.read(size)
-          es = get_payload_header(e[0],e[4]) << es
-          rtmp_packet = get_rtmp_packet_header(time, size, e[0], first) << get_rtmp_chanked_payload(es)
+          es = payload_header + es
+          rtmp_packet = get_rtmp_packet_header(time, size, e[0], first) + get_rtmp_chanked_payload(es)
 
           if first
             case e[0]
             when :audio
               mp4ah = @audio_extra
-              d = get_rtmp_packet_header(0,mp4ah.length,:audio,true) << "\xaf\0" << mp4ah
+              d = get_rtmp_packet_header(0,mp4ah.length,:audio,true) + "\xaf\0" + mp4ah
               yield(0, d)
             when :video
               avch = @video_extra
-              d = get_rtmp_packet_header(0,avch.length,:video, true) << "\x17\0\0\0\0" << avch
+              d = get_rtmp_packet_header(0,avch.length,:video, true) + "\x17\0\0\0\0" + avch
               yield(0, d)
             end
           end
@@ -106,62 +113,47 @@ module RTMP
     end
   
   private
-    def get_u24(n)
-      [n].pack("N")[1,3]
-    end
-
     def get_rtmp_packet_header(time, size, type, first)
       if first
         str = "\x05"
       else
         str = "\x45"
       end
-      str << get_u24(time)
+      str += [time].pack("N1")[1,3]
       case type
       when :audio
-        str << get_u24(size+2) << "\x08"
+        str += [size+2].pack("N1")[1,3] + "\x08"
       when :video
-        str << get_u24(size+5) << "\x09"
+        str += [size+5].pack("N1")[1,3] + "\x09"
       end
 
       if first
-        str << "\1\0\0\0"
+        str += "\1\0\0\0"
       end
-  
+
       str
-    end
-
-    def get_payload_header(type,keyframe)
-      case type
-      when :audio
-        return "\xaf\x01"
-      when :video
-        if keyframe
-          return "\x17\x01\0\0\0"
-        else
-          return "\x27\x01\0\0\0"
-        end
-      end
-    end
-
-    def min(a,b)
-      if a > b then b else a end
     end
 
     def get_rtmp_chanked_payload(payload)
       len = payload.length
-      s = StringIO.new(payload)
-      ret = ""
-      while len > 0
-        r = min(len, 4096)
-        ret << s.read(r)
-        len -= r
-        if len > 0
-          ret << "\xc5" # chank marker
+      if len < 4096
+        payload
+      else
+        ret = ''
+        ptr = 0
+        while len > 0
+          r = if(len > 4096) then 4096 else len end
+          ret += payload[ptr..ptr+r-1]
+          ptr += r
+          len -= r
+          if len > 0
+            ret += "\xc5" # chank marker
+          end
         end
+        ret
       end
-      ret
     end
+
   end
 end
 
