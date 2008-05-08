@@ -142,10 +142,10 @@ module RTMP
         ret = ''
         ptr = 0
         while len > 0
-          r = if(len > 4096) then 4096 else len end
-          ret += payload[ptr..ptr+r-1]
-          ptr += r
-          len -= r
+          s = if(len > 4096) then 4096 else len end
+          ret += payload.slice!(0, s)
+          ptr += s
+          len -= s
           if len > 0
             ret += "\xc5" # chank marker
           end
