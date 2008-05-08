@@ -22,6 +22,7 @@ require 'rtmp_session_reader'
 require 'rtmp_session_writer'
 require 'rtmp_function_call'
 require 'handshake_server'
+require 'generator'
 
 module RTMP
   class Session
@@ -110,19 +111,49 @@ private
     end    
 
     def start_send_stream
-     Thread.new do
-       offset = 3
-       next_stop_time = offset
-       start_time = Time.now.to_f
-       @stream.each do |time, pkt|
-         if time > next_stop_time
-           sleep 1
-           next_stop_time = Time.now.to_f - start_time + offset
-           IzumiLogger.debug "< time:%.3f" % [next_stop_time]
-         end
-         @sock.write(pkt)
-       end
-     end
+#      thread_invoker {|g| send_stream(g)}
+      eventmachine_timer_invoker {|g| send_stream(g)}
+    end
+    
+    def send_stream(g)
+      offset = 3
+      next_stop_time = offset
+      start_time = Time.now.to_f
+      @stream.each do |time, pkt|
+        if time > next_stop_time
+#          IzumiLogger.debug 'enter yield'
+          g.yield nil # invoked by timer (for sleeping)
+#          IzumiLogger.debug 'exit yield'
+          next_stop_time = Time.now.to_f - start_time + offset
+          IzumiLogger.debug "< time:%.3f" % [next_stop_time]
+        end
+        @sock.write(pkt)
+      end
+    end
+    
+    def thread_invoker
+      Thread.new do
+        g = Generator.new do |g|
+          yield(g)
+        end
+        loop do
+          if g.next?
+            g.next
+          end
+          sleep 1
+        end
+      end
+    end
+    
+    def eventmachine_timer_invoker
+      g = Generator.new do |g|
+        yield(g)
+      end
+      @ev_timer = EventMachine::PeriodicTimer.new(1) do
+        if g.next?
+          g.next
+        end
+      end
     end
 
   end

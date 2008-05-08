@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -wKU
+#!/usr/bin/env ruby -KU
 #
 #    RubyIZUMI Ver.0.20
 #
@@ -24,6 +24,7 @@ $: << "./lib/hmac" #!!!
 $: << "./lib/rtmp" #!!!
 $: << "./lib/mp4" #!!!
 $: << "./lib/rtp" #!!!
+$: << "./lib/eventmachine" #!!!
 
 require 'socket'
 require 'rtmp_session'
@@ -33,6 +34,7 @@ require 'stream_pool'
 require 'logger'
 require 'utils'
 require 'openssl'
+require 'server_main'
 
 module RTMP
   FmsVer = 'RubyIZUMI/0,2,0,0'
@@ -98,7 +100,7 @@ def daemon
   exit! 0
 end
 
-def server_loop(path, port, rtpmode)
+def create_stream_pool(path, rtpmode)
   pool = nil
   if rtpmode
     pool = IZUMI::StreamPoolRTP.new(path)
@@ -112,30 +114,13 @@ def server_loop(path, port, rtpmode)
       IzumiLogger.info "Target File:#{path.path}"
     end
   end
+  pool
+end
 
-  # disable DNS reverse lookup
-  TCPSocket.do_not_reverse_lookup = true
-
-  begin
-    gs = TCPServer.open(port)
-    IzumiLogger.info "Server started. Ver:#{RTMP::FmsVer} Pid:#{$$} Port:#{port}"
-    loop do
-      Thread.start(gs.accept) do |s|
-        begin
-          session = RTMP::Session.new(s, pool)
-          session.do_session
-        rescue => e
-          puts "Exception caught: #{e}"
-        ensure
-          s.close
-        end
-      end
-    end
-  rescue Interrupt
-  ensure
-    gs.close
-    IzumiLogger.info "Exit."
-  end
+def run(port, path, rtpmode)
+  pool = create_stream_pool(path, rtpmode)
+  s = IZUMI::Server.new('0.0.0.0', port)
+  s.run(pool)
 end
 
 if $0 == __FILE__
@@ -148,9 +133,9 @@ if $0 == __FILE__
   if options[:d]
     puts "Warnning: Please specify log file in daemon mode." unless options[:l]
     daemon do
-      server_loop(path, options[:p], options[:rtp])
+      run(options[:p], path, options[:rtp])
     end
   else
-    server_loop(path, options[:p], options[:rtp])
+    run(options[:p], path, options[:rtp])
   end
 end

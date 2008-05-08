@@ -19,20 +19,34 @@
 #
 
 module IZUMI
+  class EMConnection < EventMachine::Connection
+    def initialize(arg)
+      @proc = arg
+    end
 
-  class Filename
-    def initialize(path)
-      @path = path
-      @type = :unknown
-      case File.ftype(path)
-      when 'directory'
-        @type = :directory
-      when 'file'
-        @type = :file
+    def post_init
+      @io = FiberIO.new(self) {|io| @proc.call(io)}
+    end
+
+    def receive_data(data)
+      @io.push(data)
+    end
+
+=begin
+    def start_timer
+      @ev_timer = EventMachine::PeriodicTimer.new(1) do
+        yield
       end
     end
-    
-    attr_reader :type, :path
-    
+
+    def stop_timer
+      @ev_timer.cancel
+    end
+=end
+
+    # FIXME!
+#    def unbind
+#      raise ConnectionClosedException, 'Connection closed.'
+#    end
   end
 end
