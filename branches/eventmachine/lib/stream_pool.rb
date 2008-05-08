@@ -42,6 +42,15 @@ module IZUMI
       else
         IzumiLogger.debug "Loading...: #{path}"
         s = RTMP::MP4Stream.new(path)
+=begin
+#        open('/tmp/marshal.bin', 'wb') do |f|
+#          f.write Marshal.dump(s)
+#        end
+        s = nil
+        open('/tmp/marshal.bin', 'rb') do |f|
+          s = Marshal.load(f.read)
+        end
+=end
         @pool[path] = s
         s
       end
